@@ -92,11 +92,11 @@ public class QueryPanel {
 
         // Jika query DDL, navigator otomatis refresh
         if (navigatorPanel != null && isDDL(query)) {
-            navigatorPanel.refresh();
+            navigatorPanel.refresh(); 
         }
     }
 
-    // Utility method untuk deteksi perintah DDL
+    // method untuk deteksi perintah DDL
     private boolean isDDL(String query) {
         String lower = query.toLowerCase().trim();
         return lower.startsWith("create ") ||

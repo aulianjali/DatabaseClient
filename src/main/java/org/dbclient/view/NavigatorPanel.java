@@ -13,13 +13,12 @@ import javafx.scene.layout.VBox;
 
 public class NavigatorPanel {
 
-    // Enkapsulasi: field disimpan private agar hanya bisa diakses melalui method
     private Connection connection;
     private VBox panel;
     private TreeView<String> treeView;
     private QueryPanel queryPanel;
+    private String currentDatabase; // Simpan DB yang sedang aktif
 
-    // Konstruktor menerima connection dan langsung membangun UI tree-nya
     public NavigatorPanel(Connection connection) {
         this.connection = connection;
 
@@ -27,7 +26,6 @@ public class NavigatorPanel {
         panel.setPadding(new Insets(10));
         panel.setMinWidth(200);
 
-        // Styling panel
         panel.setStyle("""
             -fx-background-color: #f5f5f5;
             -fx-border-color: #cccccc;
@@ -40,46 +38,46 @@ public class NavigatorPanel {
             -fx-font-size: 13px;
         """);
 
-        refresh(); // Abstraksi: data langsung dimuat pada inisialisasi
+        refresh();
 
-        treeView.setOnMouseClicked(this::handleMouseClick); // Delegasi ke method handler
+        treeView.setOnMouseClicked(this::handleMouseClick);
         panel.getChildren().add(treeView);
     }
 
-    // Abstraksi interaksi mouse: single click untuk preview, double click untuk load tabel
     private void handleMouseClick(MouseEvent event) {
         TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
         if (selectedItem == null) return;
 
-        // Double click pada database: load semua tabelnya
         if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
             if (selectedItem.getParent() != null && selectedItem.getParent().getValue().equals("Databases")) {
                 loadTablesForDatabase(selectedItem);
             }
         }
 
-        // Single click pada tabel: preview isi tabel
         if (event.getClickCount() == 1 && event.getButton() == MouseButton.PRIMARY) {
             if (selectedItem.getParent() != null &&
                 selectedItem.getParent().getParent() != null &&
                 queryPanel != null) {
 
-                String dbName = selectedItem.getParent().getValue();
                 String tableName = selectedItem.getValue();
-                String query = "SELECT * FROM " + dbName + "." + tableName + " LIMIT 100;";
-                queryPanel.setQueryAndExecute(query); // Delegasi ke QueryPanel
+
+                if (currentDatabase != null) {
+                    String query = "SELECT * FROM " + tableName + " LIMIT 100;";
+                    queryPanel.setQueryAndExecute(query);
+                }
             }
         }
     }
 
-    // Method private khusus untuk memuat tabel dari database tertentu
     private void loadTablesForDatabase(TreeItem<String> dbItem) {
         try {
-            dbItem.getChildren().clear(); // Reset isi
+            dbItem.getChildren().clear();
             String dbName = dbItem.getValue();
 
             Statement stmt = connection.createStatement();
             stmt.execute("USE " + dbName);
+            currentDatabase = dbName; // Simpan nama DB yg aktif
+
             ResultSet rs = stmt.executeQuery("SHOW TABLES");
 
             while (rs.next()) {
@@ -88,13 +86,12 @@ public class NavigatorPanel {
                 dbItem.getChildren().add(tableItem);
             }
 
-            dbItem.setExpanded(true); // Expand setelah dimuat
+            dbItem.setExpanded(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Method publik untuk me-refresh seluruh struktur database dari awal
     public void refresh() {
         try {
             TreeItem<String> rootItem = new TreeItem<>("Databases");
@@ -110,27 +107,16 @@ public class NavigatorPanel {
 
             rootItem.setExpanded(true);
             treeView.setRoot(rootItem);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Getter view panel-nya, untuk ditampilkan di UI utama
     public VBox getView() {
         return panel;
     }
 
-    // Setter untuk injeksi QueryPanel dari luar (komposisi antar view)
     public void setQueryPanel(QueryPanel queryPanel) {
         this.queryPanel = queryPanel;
     }
 }
-
-
-// - Class ini menerapkan prinsip enkapsulasi: hanya method publik yang dibuka ('refresh()', 'getView()', 'setQueryPanel()').
-// - Menerapkan abstraksi: pemisahan logika UI (TreeView) dan logika interaksi database (loadTablesForDatabase, refresh).
-// - Ada komposisi dengan QueryPanel untuk menjalankan query dari TreeView secara langsung.
-// - Gunakan delegasi event handler ke method khusus (handleMouseClick), memisahkan logika klik dan responsnya.
-
-

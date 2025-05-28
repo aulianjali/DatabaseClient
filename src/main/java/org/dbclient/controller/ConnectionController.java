@@ -11,29 +11,63 @@ import org.dbclient.model.DatabaseConnection;
 
 public class ConnectionController {
 
-    // Enkapsulasi: objek dbConnection dibuat private dan static, akses lewat getter
     private static DatabaseConnection dbConnection = new DatabaseConnection();
 
-    // Metode ini menjalankan logika koneksi dan membuka tampilan utama
-    // menangani koneksi dan transisi ke tampilan utama
+    // Menyimpan info koneksi terakhir
+    private static String currentHost;
+    private static String currentPort;
+    private static String currentUser;
+    private static String currentPass;
+
+    // Menjalankan logika koneksi dan membuka tampilan utama
     public void handleConnection(javafx.stage.Stage stage, String host, String user, String pass, String port) {
         try {
             dbConnection.connect(host, port, user, pass);
+            
+            // Simpan info koneksi terakhir
+            currentHost = host;
+            currentPort = port;
+            currentUser = user;
+            currentPass = pass;
+            
             // Dependency Injection: mengoper objek Connection ke MainView
             new org.dbclient.view.MainView(dbConnection.getConnection()).start(stage);
         } catch (Exception e) {
-            e.printStackTrace(); // Error handling sederhana
+            e.printStackTrace(); 
         }
     }
 
-    // Getter untuk mengakses objek koneksi database secara global
-    // Memungkinkan penggunaan koneksi yang sama oleh komponen lain
+    // Method reconnect untuk koneksi ulang menggunakan info koneksi terakhir
+    public void reconnect() throws Exception {
+        if (currentHost == null || currentPort == null || currentUser == null || currentPass == null) {
+            throw new Exception("No previous connection info available.");
+        }
+        dbConnection.connect(currentHost, currentPort, currentUser, currentPass);
+    }
+
+    // Getter info koneksi terakhir
+    public static String getCurrentHost() {
+        return currentHost;
+    }
+
+    public static String getCurrentPort() {
+        return currentPort;
+    }
+
+    public static String getCurrentUser() {
+        return currentUser;
+    }
+
+    public static String getCurrentPass() {
+        return currentPass;
+    }
+
+    // Mengizinkan penggunaan koneksi yang sama oleh komponen lain
     public static DatabaseConnection getDbConnection() {
         return dbConnection;
     }
 
     // Mendapatkan daftar database dari koneksi aktif
-    // Penerapan logika bisnis yang sesuai dengan perannya sebagai controller
     public List<String> getDatabaseList() {
         List<String> dbList = new ArrayList<>();
         try {
@@ -47,14 +81,8 @@ public class ConnectionController {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Error handling 
+            e.printStackTrace();
         }
         return dbList;
     }
 }
-
-// - Class ini berperan sebagai "Controller" dalam pola MVC, menjembatani antara model (DatabaseConnection) dan view (MainView).
-// - Menggunakan enkapsulasi dengan menyimpan objek 'dbConnection' secara privat dan mengaksesnya via getter.
-// - Menerapkan abstraksi melalui method 'handleConnection' dan 'getDatabaseList' untuk menyederhanakan proses kompleks (koneksi & query).
-// - Terdapat pemanfaatan objek model sebagai dependency, menjaga keterpisahan tanggung jawab antar class (prinsip low coupling).
-// - Struktur class mendukung prinsip Single Responsibility, karena hanya fokus mengatur koneksi dan menyediakan data ke view.

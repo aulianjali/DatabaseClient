@@ -118,13 +118,13 @@ public class ResultPanel {
 
             if (isResultSet) {
                 ResultSet rs = stmt.getResultSet();
-                ResultSetMetaData metaData = rs.getMetaData();
+                ResultSetMetaData metaData = rs.getMetaData(); //ambil metadata buat tau info kolom
                 int columnCount = metaData.getColumnCount();
 
                 // Generate kolom berdasarkan metadata
                 for (int i = 1; i <= columnCount; i++) {
                     final int colIndex = i - 1;
-                    TableColumn<List<String>, String> col = new TableColumn<>(metaData.getColumnLabel(i));
+                    TableColumn<List<String>, String> col = new TableColumn<>(metaData.getColumnLabel(i)); //dapet dari database
                     col.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(colIndex)));
                     col.setCellFactory(getHighlightingCellFactory());
                     tableView.getColumns().add(col);
