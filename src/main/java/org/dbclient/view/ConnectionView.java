@@ -29,12 +29,12 @@ public class ConnectionView {
     private BorderPane buildUI() {
         BorderPane layout = new BorderPane();
 
-        // Form bagian tengah
+        // form bagian tengah
         VBox form = new VBox(12);
         form.setPadding(new Insets(30));
         form.setAlignment(Pos.CENTER);
 
-        // Input field
+        // input field
         TextField hostField = new TextField();
         TextField portField = new TextField();
         TextField userField = new TextField();
@@ -42,7 +42,7 @@ public class ConnectionView {
         Button connectBtn = new Button("Connect");
         connectBtn.setPrefWidth(100);
 
-        // Styling label
+        // styling label
         form.getChildren().addAll(
             createLabeledField("Host", hostField),
             createLabeledField("Port", portField),
@@ -53,7 +53,7 @@ public class ConnectionView {
 
         layout.setCenter(form);
 
-        // Action connect
+        // action connect
         connectBtn.setOnAction(e -> {
             ConnectionController controller = new ConnectionController();
             controller.handleConnection(stage, hostField.getText(), userField.getText(), passField.getText(), portField.getText());

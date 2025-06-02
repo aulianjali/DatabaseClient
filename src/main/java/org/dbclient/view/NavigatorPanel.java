@@ -17,7 +17,7 @@ public class NavigatorPanel {
     private VBox panel;
     private TreeView<String> treeView;
     private QueryPanel queryPanel;
-    private String currentDatabase; // Simpan DB yang sedang aktif
+    private String currentDatabase; 
 
     public NavigatorPanel(Connection connection) {
         this.connection = connection;
@@ -76,7 +76,7 @@ public class NavigatorPanel {
 
             Statement stmt = connection.createStatement();
             stmt.execute("USE " + dbName);
-            currentDatabase = dbName; // Simpan nama DB yg aktif
+            currentDatabase = dbName;
 
             ResultSet rs = stmt.executeQuery("SHOW TABLES");
 
@@ -94,6 +94,17 @@ public class NavigatorPanel {
 
     public void refresh() {
         try {
+            // nyimpen nama database yang sebelumnya kebuka (klo ada)
+            String expandedDb = null;
+            if (treeView.getRoot() != null) {
+                for (TreeItem<String> dbItem : treeView.getRoot().getChildren()) {
+                    if (dbItem.isExpanded()) {
+                        expandedDb = dbItem.getValue();
+                        break;
+                    }
+                }
+            }
+
             TreeItem<String> rootItem = new TreeItem<>("Databases");
 
             Statement stmt = connection.createStatement();
@@ -102,11 +113,18 @@ public class NavigatorPanel {
             while (rs.next()) {
                 String dbName = rs.getString(1);
                 TreeItem<String> dbItem = new TreeItem<>(dbName);
+
+                // kalo database yang sebelumnya expanded, load tabel-nya langsung
+                if (dbName.equals(expandedDb)) {
+                    loadTablesForDatabase(dbItem); // include setExpanded(true)
+                }
+
                 rootItem.getChildren().add(dbItem);
             }
 
             rootItem.setExpanded(true);
             treeView.setRoot(rootItem);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

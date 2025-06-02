@@ -20,7 +20,7 @@ public class MainView {
     private ResultPanel resultPanel;
     private NavigatorPanel navigatorPanel;
 
-    // Label untuk menampilkan info koneksi di topbar
+    // menampilkan info koneksi di topbar
     private Label hostLabel;
     private Label portLabel;
     private Label userLabel;
@@ -38,13 +38,12 @@ public class MainView {
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setStyle("-fx-background-color: #2c3e50;");
 
-        // Label info koneksi yang dinamis
+        // info koneksi yang dinamis
         hostLabel = new Label();
         portLabel = new Label();
         userLabel = new Label();
         passLabel = new Label();
-
-        // Label statis (judul) dengan warna putih & bold
+    
         Label hostLabelText = new Label("Host:");
         hostLabelText.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
         Label portLabelText = new Label("Port:");
@@ -54,7 +53,6 @@ public class MainView {
         Label passLabelText = new Label("Pass:");
         passLabelText.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
-        // Label info koneksi juga berwarna putih agar kontras
         hostLabel.setStyle("-fx-text-fill: white;");
         portLabel.setStyle("-fx-text-fill: white;");
         userLabel.setStyle("-fx-text-fill: white;");
@@ -69,14 +67,14 @@ public class MainView {
 
         root.setTop(topBar);
 
-        // Bagian kiri: navigator panel
+        // kiri: navigator panel
         VBox leftPanel = new VBox();
         leftPanel.setPadding(new Insets(5));
         leftPanel.setStyle("-fx-background-color: #ecf0f1;");
         leftPanel.setPrefWidth(220);
         root.setLeft(leftPanel);
 
-        // Bagian tengah: query panel
+        // tengah: query panel
         VBox centerPanel = new VBox(10);
         centerPanel.setPadding(new Insets(10));
 
@@ -87,10 +85,10 @@ public class MainView {
         centerPanel.getChildren().add(queryPanel.getView());
         root.setCenter(centerPanel);
 
-        // Bagian bawah: hasil query
+        // bawah: hasil query
         root.setBottom(resultPanel.getView());
 
-        // Jika koneksi awal ada, update info topbar dan panel navigator
+        // update info topbar dan panel navigator
         if (connection != null) {
             resultPanel.setConnection(connection);
             queryPanel.setConnection(connection);
@@ -102,7 +100,7 @@ public class MainView {
 
             updateConnectionInfo();
         } else {
-            // Kalau belum koneksi, tampilkan tanda "-"
+            // kalo belum koneksi
             hostLabel.setText("-");
             portLabel.setText("-");
             userLabel.setText("-");
@@ -115,7 +113,7 @@ public class MainView {
         stage.show();
     }
 
-    // Update label info koneksi dari ConnectionController
+    // update label info koneksi dari ConnectionController
     private void updateConnectionInfo() {
         String host = ConnectionController.getCurrentHost();
         String port = ConnectionController.getCurrentPort();
@@ -126,7 +124,7 @@ public class MainView {
         portLabel.setText(port != null ? port : "-");
         userLabel.setText(user != null ? user : "-");
         if (pass != null && !pass.isEmpty()) {
-            passLabel.setText("*".repeat(pass.length())); // sembunyikan password dengan asterik
+            passLabel.setText("*".repeat(pass.length())); 
         } else {
             passLabel.setText(" ");
         }

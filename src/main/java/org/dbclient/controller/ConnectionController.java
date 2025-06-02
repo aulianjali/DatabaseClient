@@ -13,31 +13,31 @@ public class ConnectionController {
 
     private static DatabaseConnection dbConnection = new DatabaseConnection();
 
-    // Menyimpan info koneksi terakhir
+    // simpan info koneksi terakhir
     private static String currentHost;
     private static String currentPort;
     private static String currentUser;
     private static String currentPass;
 
-    // Menjalankan logika koneksi dan membuka tampilan utama
+    // logika koneksi dan membuka tampilan utama
     public void handleConnection(javafx.stage.Stage stage, String host, String user, String pass, String port) {
         try {
             dbConnection.connect(host, port, user, pass);
             
-            // Simpan info koneksi terakhir
+            // info koneksi terakhir
             currentHost = host;
             currentPort = port;
             currentUser = user;
             currentPass = pass;
             
-            // Dependency Injection: mengoper objek Connection ke MainView
+            // mengoper objek Connection ke MainView
             new org.dbclient.view.MainView(dbConnection.getConnection()).start(stage);
         } catch (Exception e) {
             e.printStackTrace(); 
         }
     }
 
-    // Method reconnect untuk koneksi ulang menggunakan info koneksi terakhir
+    // koneksi ulang menggunakan info koneksi terakhir
     public void reconnect() throws Exception {
         if (currentHost == null || currentPort == null || currentUser == null || currentPass == null) {
             throw new Exception("No previous connection info available.");
@@ -45,7 +45,7 @@ public class ConnectionController {
         dbConnection.connect(currentHost, currentPort, currentUser, currentPass);
     }
 
-    // Getter info koneksi terakhir
+    // getter info koneksi terakhir
     public static String getCurrentHost() {
         return currentHost;
     }
@@ -62,12 +62,12 @@ public class ConnectionController {
         return currentPass;
     }
 
-    // Mengizinkan penggunaan koneksi yang sama oleh komponen lain
+    // mengizinkan penggunaan koneksi yang sama oleh komponen lain
     public static DatabaseConnection getDbConnection() {
         return dbConnection;
     }
 
-    // Mendapatkan daftar database dari koneksi aktif
+    // mendapatkan daftar database dari koneksi aktif
     public List<String> getDatabaseList() {
         List<String> dbList = new ArrayList<>();
         try {

@@ -8,26 +8,20 @@ import javafx.scene.layout.VBox;
 
 public class QueryPanel {
 
-    // Enkapsulasi: semua atribut dibuat private
     private Connection connection;
     private VBox panel;
     private ResultPanel resultPanel;
     private NavigatorPanel navigatorPanel;
-
     private TextArea queryArea;
 
-    // Konstruktor utama dengan parameter connection
     public QueryPanel(Connection connection) {
         this.connection = connection;
         panel = new VBox();
 
-        queryArea = new TextArea("SELECT * FROM ...;");
+        queryArea = new TextArea();
         Button executeBtn = new Button("Execute");
-
-        // Event handling: delegasi ke method eksekusi
         executeBtn.setOnAction(e -> executeQuery());
 
-        // Styling panel dan komponen
         panel.setStyle("""
             -fx-background-color: #f5f5f5;
             -fx-padding: 12;
@@ -55,7 +49,6 @@ public class QueryPanel {
         panel.getChildren().addAll(queryArea, executeBtn);
     }
 
-    // Enkapsulasi dan Dependency Injection
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
@@ -68,29 +61,27 @@ public class QueryPanel {
         this.navigatorPanel = navigatorPanel;
     }
 
-    // Abstraksi tampilan
     public VBox getView() {
         return panel;
     }
 
-    // Digunakan saat TreeView memilih tabel, langsung set query dan eksekusi
+    // saat TreeView memilih tabel, langsung set query dan eksekusi
     public void setQueryAndExecute(String query) {
         queryArea.setText(query);
         executeQuery();
     }
 
-    // Abstraksi proses eksekusi query
     public void executeQuery() {
         String query = queryArea.getText().trim();
 
-        // Polimorfisme implisit: resultPanel tahu cara menampilkan query
+        // resultPanel tahu cara menampilkan query
         if (resultPanel != null) {
             resultPanel.showResult(query);
         } else {
             System.err.println("ResultPanel belum diset!");
         }
 
-        // Jika query DDL, navigator otomatis refresh
+        // klo query DDL, navigator refresh
         if (navigatorPanel != null && isDDL(query)) {
             navigatorPanel.refresh(); 
         }
@@ -107,9 +98,5 @@ public class QueryPanel {
     }
 }
 
-// - Menerapkan prinsip enkapsulasi (semua properti dan logic disimpan private).
-// - Menerapkan komposisi: bekerja sama dengan 'ResultPanel' dan 'NavigatorPanel' untuk menyusun alur UI.
-// - Terdapat abstraksi: metode 'executeQuery' memisahkan logika eksekusi dari UI langsung.
-// - Dependency injection: dependency eksternal (resultPanel & navigatorPanel) disediakan lewat setter.
 
 

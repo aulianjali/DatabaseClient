@@ -24,13 +24,12 @@ import javafx.util.Callback;
 
 public class ResultPanel {
 
-    // Enkapsulasi: semua field dibuat private
     private final VBox panel;
     private TableView<List<String>> tableView;
     private Connection connection;
     private boolean isTableFullySelected = false;
 
-    // Konstruktor: inisialisasi panel hasil
+    // inisialisasi panel hasil
     public ResultPanel() {
         panel = new VBox();
         tableView = new TableView<>();
@@ -43,7 +42,6 @@ public class ResultPanel {
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
 
-        // Styling
         panel.setStyle("""
             -fx-background-color: #f5f5f5;
             -fx-padding: 12;
@@ -61,7 +59,7 @@ public class ResultPanel {
 
         panel.getChildren().add(scrollPane);
 
-        // Fitur: Klik mouse → select seluruh isi tabel
+        // klik → select seluruh isi tabel
         tableView.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             isTableFullySelected = true;
             tableView.getSelectionModel().clearSelection();
@@ -73,7 +71,7 @@ public class ResultPanel {
             tableView.refresh();
         });
 
-        // Fitur: Ctrl + C untuk copy data seluruh tabel
+        // Ctrl + C untuk copy data seluruh tabel
         tableView.setOnKeyPressed(event -> {
             if (event.isControlDown() && event.getCode() == KeyCode.C) {
                 StringBuilder clipboardString = new StringBuilder();
@@ -93,7 +91,6 @@ public class ResultPanel {
                 content.putString(clipboardString.toString());
                 Clipboard.getSystemClipboard().setContent(content);
 
-                // Reset highlight
                 isTableFullySelected = false;
                 tableView.getSelectionModel().clearSelection();
                 tableView.refresh();
@@ -101,12 +98,12 @@ public class ResultPanel {
         });
     }
 
-    // Dependency injection: set koneksi dari luar
+    // set koneksi dari luar
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
 
-    // Abstraksi: method utama untuk menampilkan hasil query
+    // method utama untuk menampilkan hasil query
     public void showResult(String query) {
         tableView.getItems().clear();
         tableView.getColumns().clear();
@@ -121,16 +118,16 @@ public class ResultPanel {
                 ResultSetMetaData metaData = rs.getMetaData(); //ambil metadata buat tau info kolom
                 int columnCount = metaData.getColumnCount();
 
-                // Generate kolom berdasarkan metadata
+                // generate kolom berdasarkan metadata
                 for (int i = 1; i <= columnCount; i++) {
                     final int colIndex = i - 1;
-                    TableColumn<List<String>, String> col = new TableColumn<>(metaData.getColumnLabel(i)); //dapet dari database
+                    TableColumn<List<String>, String> col = new TableColumn<>(metaData.getColumnLabel(i)); //diambil dari database secara dinamis
                     col.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(colIndex)));
                     col.setCellFactory(getHighlightingCellFactory());
                     tableView.getColumns().add(col);
                 }
 
-                // Isi data ke tabel
+                // isi data ke tabel
                 while (rs.next()) {
                     List<String> row = new ArrayList<>();
                     for (int i = 1; i <= columnCount; i++) {
@@ -139,7 +136,6 @@ public class ResultPanel {
                     tableView.getItems().add(row);
                 }
 
-                // Row style saat full selected
                 tableView.setRowFactory(tv -> new TableRow<>() {
                     @Override
                     protected void updateItem(List<String> item, boolean empty) {
@@ -162,7 +158,6 @@ public class ResultPanel {
         }
     }
 
-    // Factory method untuk custom highlight cell
     private Callback<TableColumn<List<String>, String>, TableCell<List<String>, String>> getHighlightingCellFactory() {
         return col -> new TableCell<>() {
             @Override
@@ -178,7 +173,6 @@ public class ResultPanel {
         };
     }
 
-    // Tampilkan error di panel
     public void showError(String message) {
         tableView.getItems().clear();
         tableView.getColumns().clear();
@@ -188,7 +182,6 @@ public class ResultPanel {
         panel.getChildren().setAll(errorLabel);
     }
 
-    // Tampilkan pesan sukses
     public void showMessage(String message) {
         tableView.getItems().clear();
         tableView.getColumns().clear();
@@ -198,16 +191,8 @@ public class ResultPanel {
         panel.getChildren().setAll(msgLabel);
     }
 
-    // Getter tampilan
+    // getter tampilan
     public VBox getView() {
         return panel;
     }
 }
-
-
-// - Menggunakan enkapsulasi: field bersifat private, akses melalui metode.
-// - Menerapkan abstraksi: method 'showResult', 'showError', dan 'showMessage' menyederhanakan logika penggunaan luar.
-// - Komposisi: menggunakan TableView, Label, dan VBox untuk membangun tampilan.
-// - Polimorfisme: penggunaan callback 'getHighlightingCellFactory' mengimplementasikan perilaku cell table secara fleksibel.
-// - Reusability & Cohesion: panel ini hanya fokus pada hasil query dan interaksi dengan TableView.
-
